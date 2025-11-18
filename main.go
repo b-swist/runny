@@ -6,12 +6,16 @@ import (
 )
 
 func main() {
-	entries, err := getEntries()
+	entries, err := getAppEntries()
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	for i, entry := range entries {
-		fmt.Printf("%v: %v\n", i, (*entry).Name.Default)
+		fmt.Printf("#%v %v: %v\n", i, getDefaultName(entry), getFinalExec(entry))
 	}
+	var index int
+	fmt.Print("Index: ")
+	fmt.Scan(&index)
+	runApp(entries[index])
 }
