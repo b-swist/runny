@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"os/exec"
 	"path/filepath"
 	"slices"
 )
@@ -21,4 +22,17 @@ func intersects(a, b []string) bool {
 		}
 	}
 	return false
+}
+
+func getFullExecPath(cmd string) (string, error) {
+	if filepath.IsAbs(cmd) {
+		return cmd, nil
+	}
+
+	path, err := exec.LookPath(cmd)
+	if err != nil {
+		return "", err
+	}
+
+	return path, nil
 }

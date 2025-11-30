@@ -43,10 +43,12 @@ func filterAppEntries(entries []*desktop.Entry) []*desktop.Entry {
 			continue
 		}
 
-		if len(entry.OnlyShowIn) != 0 && intersects(xdgCurrentDesktop, entry.OnlyShowIn) {
-			continue
-		} else if intersects(xdgCurrentDesktop, entry.NotShowIn) {
-			continue
+		if xdgCurrentDesktop != nil {
+			if len(entry.OnlyShowIn) != 0 && intersects(xdgCurrentDesktop, entry.OnlyShowIn) {
+				continue
+			} else if intersects(xdgCurrentDesktop, entry.NotShowIn) {
+				continue
+			}
 		}
 
 		result = append(result, entry)
@@ -71,6 +73,16 @@ func getFinalExec(e *desktop.Entry) []string {
 
 func getDefaultName(e *desktop.Entry) string {
 	return e.Name.Default
+}
+
+func getDescription(e *desktop.Entry) string {
+	if s := e.Comment; s.Default != "" {
+		return s.Default
+	}
+	if s := e.GenericName; s.Default != "" {
+		return s.Default
+	}
+	return "No description"
 }
 
 func sortEntries(entries []*desktop.Entry) {
