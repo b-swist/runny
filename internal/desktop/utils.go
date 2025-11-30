@@ -1,11 +1,20 @@
-package main
+package desktop
 
 import (
 	"os"
-	"os/exec"
 	"path/filepath"
 	"slices"
+	"strings"
 )
+
+func sortEntries(entries []*Entry) {
+	slices.SortFunc(entries, func(a, b *Entry) int {
+		return strings.Compare(
+			strings.ToLower(GetDefaultName(a)),
+			strings.ToLower(GetDefaultName(b)),
+		)
+	})
+}
 
 func getXdgCurrentDesktop() []string {
 	env, ok := os.LookupEnv("XDG_CURRENT_DIR")
@@ -22,17 +31,4 @@ func intersects(a, b []string) bool {
 		}
 	}
 	return false
-}
-
-func getFullExecPath(cmd string) (string, error) {
-	if filepath.IsAbs(cmd) {
-		return cmd, nil
-	}
-
-	path, err := exec.LookPath(cmd)
-	if err != nil {
-		return "", err
-	}
-
-	return path, nil
 }

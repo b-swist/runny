@@ -1,11 +1,10 @@
-package main
+package app
 
 import (
-	"github.com/MatthiasKunnen/xdg/desktop"
+	"github.com/b-swist/runny/internal/desktop"
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
-	"log"
 )
 
 type item struct {
@@ -17,41 +16,30 @@ func (i item) Title() string       { return i.title }
 func (i item) Description() string { return i.desc }
 func (i item) FilterValue() string { return i.title }
 
-type keyMap struct {
-	choose key.Binding
-}
-
-func newKeyMap() *keyMap {
-	return &keyMap{
-		choose: key.NewBinding(
-			key.WithKeys("enter"),
-			key.WithHelp("↵", "select"),
-		),
-	}
-}
-
-type model struct {
+type Model struct {
 	list     list.Model
 	keys     *keyMap
 	selected *desktop.Entry
 }
 
-func newModel() (*model, error) {
-	entries, err := getAppEntries()
+func (m Model) Selected() *desktop.Entry { return m.selected }
+
+func NewModel() (Model, error) {
+	entries, err := desktop.GetAppEntries()
 	if err != nil {
-		return nil, err
+		return Model{}, err
 	}
 
 	items := make([]list.Item, 0, len(entries))
 	for _, e := range entries {
 		items = append(items, item{
-			title: getDefaultName(e),
-			desc:  getDescription(e),
+			title: desktop.GetDefaultName(e),
+			desc:  desktop.GetDescription(e),
 			entry: e,
 		})
 	}
 
-	m := &model{
+	m := Model{
 		list: list.New(items, list.NewDefaultDelegate(), 0, 0),
 		keys: newKeyMap(),
 	}
@@ -60,15 +48,15 @@ func newModel() (*model, error) {
 	return m, nil
 }
 
-func (m model) Init() tea.Cmd {
+func (m Model) Init() tea.Cmd {
 	return nil
 }
 
-func (m model) View() string {
+func (m Model) View() string {
 	return m.list.View()
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.list.SetSize(msg.Width, msg.Height)
@@ -87,27 +75,4 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	m.list, cmd = m.list.Update(msg)
 	return m, cmd
-}
-
-func main() {
-	m, err := newModel()
-	if err != nil {
-		panic(err)
-	}
-
-	p := tea.NewProgram(m, tea.WithAltScreen())
-
-	final, err := p.Run()
-	if err != nil {
-		log.Fatal("Error running program:", err)
-	}
-
-	fm, ok := final.(model)
-	if !ok {
-		log.Fatal(err)
-	}
-
-	if fm.selected != nil {
-		runApp(fm.selected)
-	}
 }

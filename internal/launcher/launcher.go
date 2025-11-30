@@ -1,15 +1,16 @@
-package main
+package launcher
 
 import (
-	"golang.org/x/sys/unix"
 	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
 
-	"github.com/MatthiasKunnen/xdg/desktop"
+	"github.com/b-swist/runny/internal/desktop"
+	"golang.org/x/sys/unix"
 )
 
-func runApp(e *desktop.Entry) {
+func Launch(e *desktop.Entry) {
 	if e.Terminal {
 		runTerm(e)
 	} else {
@@ -18,7 +19,7 @@ func runApp(e *desktop.Entry) {
 }
 
 func runTerm(e *desktop.Entry) {
-	tokens := getFinalExec(e)
+	tokens := desktop.GetFinalExec(e)
 	execPath, err := getFullExecPath(tokens[0])
 	if err != nil {
 		log.Fatal(err)
@@ -30,7 +31,7 @@ func runTerm(e *desktop.Entry) {
 }
 
 func runGUI(e *desktop.Entry) {
-	tokens := getFinalExec(e)
+	tokens := desktop.GetFinalExec(e)
 	execPath, err := getFullExecPath(tokens[0])
 	if err != nil {
 		log.Fatal(err)
@@ -47,4 +48,17 @@ func runGUI(e *desktop.Entry) {
 	if err = cmd.Process.Release(); err != nil {
 		log.Fatal(err)
 	}
+}
+
+func getFullExecPath(cmd string) (string, error) {
+	if filepath.IsAbs(cmd) {
+		return cmd, nil
+	}
+
+	path, err := exec.LookPath(cmd)
+	if err != nil {
+		return "", err
+	}
+
+	return path, nil
 }

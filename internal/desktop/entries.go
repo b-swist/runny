@@ -1,23 +1,22 @@
-package main
+package desktop
 
 import (
+	xdg "github.com/MatthiasKunnen/xdg/desktop"
 	"log"
-	"slices"
-	"strings"
-
-	"github.com/MatthiasKunnen/xdg/desktop"
 )
 
-func getEntries() ([]*desktop.Entry, error) {
-	entries, err := desktop.GetDesktopFiles(desktop.GetDesktopFileLocations())
+type Entry = xdg.Entry
+
+func getAllEntries() ([]*Entry, error) {
+	entries, err := xdg.GetDesktopFiles(xdg.GetDesktopFileLocations())
 	if err != nil {
 		return nil, err
 	}
 
-	result := make([]*desktop.Entry, 0, len(entries))
+	result := make([]*Entry, 0, len(entries))
 	for _, paths := range entries {
 		path := paths[0]
-		entry, err := desktop.LoadFile(path)
+		entry, err := xdg.LoadFile(path)
 
 		if err != nil {
 			log.Printf("Could not parse %v: %v", path, err)
@@ -30,8 +29,8 @@ func getEntries() ([]*desktop.Entry, error) {
 	return result, nil
 }
 
-func filterAppEntries(entries []*desktop.Entry) []*desktop.Entry {
-	result := make([]*desktop.Entry, 0, len(entries))
+func filterAppEntries(entries []*Entry) []*Entry {
+	result := make([]*Entry, 0, len(entries))
 	xdgCurrentDesktop := getXdgCurrentDesktop()
 
 	for _, entry := range entries {
@@ -57,8 +56,8 @@ func filterAppEntries(entries []*desktop.Entry) []*desktop.Entry {
 	return result
 }
 
-func getAppEntries() ([]*desktop.Entry, error) {
-	entries, err := getEntries()
+func GetAppEntries() ([]*Entry, error) {
+	entries, err := getAllEntries()
 	if err != nil {
 		return nil, err
 	}
@@ -67,15 +66,15 @@ func getAppEntries() ([]*desktop.Entry, error) {
 	return filtered, nil
 }
 
-func getFinalExec(e *desktop.Entry) []string {
-	return e.Exec.ToArguments(desktop.FieldCodeProvider{})
+func GetFinalExec(e *Entry) []string {
+	return e.Exec.ToArguments(xdg.FieldCodeProvider{})
 }
 
-func getDefaultName(e *desktop.Entry) string {
+func GetDefaultName(e *Entry) string {
 	return e.Name.Default
 }
 
-func getDescription(e *desktop.Entry) string {
+func GetDescription(e *Entry) string {
 	if s := e.Comment; s.Default != "" {
 		return s.Default
 	}
@@ -83,13 +82,4 @@ func getDescription(e *desktop.Entry) string {
 		return s.Default
 	}
 	return "No description"
-}
-
-func sortEntries(entries []*desktop.Entry) {
-	slices.SortFunc(entries, func(a, b *desktop.Entry) int {
-		return strings.Compare(
-			strings.ToLower(getDefaultName(a)),
-			strings.ToLower(getDefaultName(b)),
-		)
-	})
 }
