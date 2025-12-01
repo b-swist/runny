@@ -1,7 +1,6 @@
 package launcher
 
 import (
-	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -10,31 +9,39 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-func Launch(e *desktop.Entry) {
+func Launch(e *desktop.Entry) error {
 	if e.Terminal {
-		runTerm(e)
+		if err := runTerm(e); err != nil {
+			return err
+		}
 	} else {
-		runGUI(e)
+		if err := runGUI(e); err != nil {
+			return err
+		}
 	}
+
+	return nil
 }
 
-func runTerm(e *desktop.Entry) {
+func runTerm(e *desktop.Entry) error {
 	tokens := desktop.GetFinalExec(e)
 	execPath, err := getFullExecPath(tokens[0])
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	if err := unix.Exec(execPath, tokens, os.Environ()); err != nil {
-		log.Fatal(err)
+		return err
 	}
+
+	return nil
 }
 
-func runGUI(e *desktop.Entry) {
+func runGUI(e *desktop.Entry) error {
 	tokens := desktop.GetFinalExec(e)
 	execPath, err := getFullExecPath(tokens[0])
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	cmd := exec.Command(execPath, tokens[1:]...)
@@ -42,12 +49,14 @@ func runGUI(e *desktop.Entry) {
 	cmd.SysProcAttr = &unix.SysProcAttr{Setsid: true}
 
 	if err = cmd.Start(); err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	if err = cmd.Process.Release(); err != nil {
-		log.Fatal(err)
+		return err
 	}
+
+	return nil
 }
 
 func getFullExecPath(cmd string) (string, error) {

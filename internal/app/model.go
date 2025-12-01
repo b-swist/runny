@@ -2,7 +2,6 @@ package app
 
 import (
 	"github.com/b-swist/runny/internal/desktop"
-	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -17,17 +16,17 @@ func (i item) Description() string { return i.desc }
 func (i item) FilterValue() string { return i.title }
 
 type Model struct {
-	list     list.Model
-	keys     *keyMap
-	selected *desktop.Entry
+	list   list.Model
+	chosen item
 }
 
-func (m Model) Selected() *desktop.Entry { return m.selected }
+func (m *Model) ChosenEntry() *desktop.Entry { return m.chosen.entry }
 
-func NewModel() (Model, error) {
+func NewModel() Model {
+
 	entries, err := desktop.GetAppEntries()
 	if err != nil {
-		return Model{}, err
+		panic(err)
 	}
 
 	items := make([]list.Item, 0, len(entries))
@@ -39,13 +38,11 @@ func NewModel() (Model, error) {
 		})
 	}
 
-	m := Model{
-		list: list.New(items, list.NewDefaultDelegate(), 0, 0),
-		keys: newKeyMap(),
-	}
-	m.list.Title = "runny"
+	delegate := newItemDelegate(newDelegateKeyMap())
+	modelList := list.New(items, delegate, 0, 0)
+	modelList.Title = "runny"
 
-	return m, nil
+	return Model{list: modelList}
 }
 
 func (m Model) Init() tea.Cmd {
@@ -60,16 +57,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.list.SetSize(msg.Width, msg.Height)
-
-	case tea.KeyMsg:
-		switch {
-		case key.Matches(msg, m.keys.choose):
-			i, ok := m.list.SelectedItem().(item)
-			if ok {
-				m.selected = i.entry
-			}
-			return m, tea.Quit
-		}
+	case chosenItemMsg:
+		m.chosen = msg.item
+		return m, tea.Quit
 	}
 
 	var cmd tea.Cmd

@@ -9,24 +9,21 @@ import (
 )
 
 func main() {
-	m, err := app.NewModel()
-	if err != nil {
-		panic(err)
-	}
+	p := tea.NewProgram(app.NewModel(), tea.WithAltScreen())
 
-	p := tea.NewProgram(m, tea.WithAltScreen())
-
-	final, err := p.Run()
+	fm, err := p.Run()
 	if err != nil {
 		log.Fatal("Error running program:", err)
 	}
 
-	fm, ok := final.(app.Model)
+	m, ok := fm.(app.Model)
 	if !ok {
-		log.Fatal(err)
+		return
 	}
 
-	if fm.Selected() != nil {
-		launcher.Launch(fm.Selected())
+	if m.ChosenEntry() != nil {
+		if err := launcher.Launch(m.ChosenEntry()); err != nil {
+			log.Fatal(err)
+		}
 	}
 }
