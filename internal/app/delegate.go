@@ -13,7 +13,7 @@ type chosenItemMsg struct {
 func chosenItem(m *list.Model) tea.Cmd {
 	it, ok := m.SelectedItem().(item)
 	if !ok {
-		return func() tea.Msg { return nil }
+		return nil
 	}
 	return func() tea.Msg {
 		return chosenItemMsg{item: it}
