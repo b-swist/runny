@@ -16,11 +16,11 @@ func (i item) Description() string { return i.desc }
 func (i item) FilterValue() string { return i.title }
 
 type Model struct {
-	list   list.Model
-	chosen item
+	list        list.Model
+	chosenEntry *desktop.Entry
 }
 
-func (m *Model) ChosenEntry() *desktop.Entry { return m.chosen.entry }
+func (m *Model) ChosenEntry() *desktop.Entry { return m.chosenEntry }
 
 func NewModel() Model {
 
@@ -57,8 +57,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.list.SetSize(msg.Width, msg.Height)
-	case chosenItemMsg:
-		m.chosen = msg.item
+	case chosenEntryMsg:
+		m.chosenEntry = msg.entry
 		return m, tea.Quit
 	}
 

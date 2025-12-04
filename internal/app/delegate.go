@@ -1,13 +1,14 @@
 package app
 
 import (
+	"github.com/b-swist/runny/internal/desktop"
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-type chosenItemMsg struct {
-	item item
+type chosenEntryMsg struct {
+	entry *desktop.Entry
 }
 
 func chosenItem(m *list.Model) tea.Cmd {
@@ -16,7 +17,7 @@ func chosenItem(m *list.Model) tea.Cmd {
 		return nil
 	}
 	return func() tea.Msg {
-		return chosenItemMsg{item: it}
+		return chosenEntryMsg{entry: it.entry}
 	}
 }
 
