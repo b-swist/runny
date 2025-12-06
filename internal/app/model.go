@@ -58,7 +58,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		m.list.SetSize(msg.Width, msg.Height)
 	case chosenEntryMsg:
-		m.chosenEntry = msg.entry
+		m.chosenEntry = msg
 		return m, tea.Quit
 	}
 

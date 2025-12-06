@@ -7,17 +7,17 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-type chosenEntryMsg struct {
-	entry *desktop.Entry
-}
+type chosenEntryMsg *desktop.Entry
 
 func chosenItem(m *list.Model) tea.Cmd {
 	it, ok := m.SelectedItem().(item)
 	if !ok {
 		return nil
 	}
+
+	chosen := it.entry
 	return func() tea.Msg {
-		return chosenEntryMsg{entry: it.entry}
+		return chosenEntryMsg(chosen)
 	}
 }
 
