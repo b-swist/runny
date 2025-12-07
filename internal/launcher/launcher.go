@@ -5,11 +5,11 @@ import (
 	"os/exec"
 	"path/filepath"
 
-	"github.com/b-swist/runny/internal/desktop"
+	"github.com/b-swist/runny/internal/drun"
 	"golang.org/x/sys/unix"
 )
 
-func Launch(e *desktop.Entry) error {
+func Launch(e *drun.Entry) error {
 	if e.Terminal {
 		if err := runTerm(e); err != nil {
 			return err
@@ -23,8 +23,8 @@ func Launch(e *desktop.Entry) error {
 	return nil
 }
 
-func runTerm(e *desktop.Entry) error {
-	tokens := desktop.GetFinalExec(e)
+func runTerm(e *drun.Entry) error {
+	tokens := drun.StripFieldCodes(e.Exec)
 	execPath, err := getFullExecPath(tokens[0])
 	if err != nil {
 		return err
@@ -37,8 +37,8 @@ func runTerm(e *desktop.Entry) error {
 	return nil
 }
 
-func runGUI(e *desktop.Entry) error {
-	tokens := desktop.GetFinalExec(e)
+func runGUI(e *drun.Entry) error {
+	tokens := drun.StripFieldCodes(e.Exec)
 	execPath, err := getFullExecPath(tokens[0])
 	if err != nil {
 		return err

@@ -1,13 +1,13 @@
 package app
 
 import (
-	"github.com/b-swist/runny/internal/desktop"
+	"github.com/b-swist/runny/internal/drun"
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-type chosenEntryMsg *desktop.Entry
+type chosenEntryMsg *drun.Entry
 
 func chosenItem(m *list.Model) tea.Cmd {
 	it, ok := m.SelectedItem().(item)
