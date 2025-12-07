@@ -28,6 +28,14 @@ func isExcluded(e *Entry, desktop []string) bool {
 	return utils.Intersects(e.NotShowIn, desktop)
 }
 
+func loadEntry(path string) (*Entry, error) {
+	entry, err := xdg.LoadFile(path)
+	if err != nil {
+		return nil, err
+	}
+	return entry, nil
+}
+
 func StripFieldCodes(e xdg.ExecValue) []string {
 	return e.ToArguments(xdg.FieldCodeProvider{})
 }

@@ -3,6 +3,7 @@ package drun
 import (
 	"errors"
 	"fmt"
+	"sync"
 
 	xdg "github.com/MatthiasKunnen/xdg/desktop"
 	"github.com/b-swist/runny/internal/utils"
@@ -30,20 +31,42 @@ func AllEntries() ([]*Entry, error) {
 		return nil, err
 	}
 
-	result := make([]*Entry, 0, len(entries))
-	errs := make([]error, 0, len(entries))
+	count := len(entries)
+	var (
+		resCh = make(chan *Entry, count)
+		errCh = make(chan error, count)
+		wg    sync.WaitGroup
+	)
 
-	for _, paths := range entries {
-		path := paths[0]
-		entry, err := xdg.LoadFile(path)
-
-		if err != nil {
-			errs = append(errs, fmt.Errorf("could not parse %s: %w", path, err))
+	for name, paths := range entries {
+		if len(paths) == 0 {
+			errCh <- fmt.Errorf("no path associated with %s", name)
 			continue
 		}
+		path := paths[0]
 
-		result = append(result, entry)
+		wg.Add(1)
+		go func(p string) {
+			defer wg.Done()
+
+			entry, err := loadEntry(p)
+			if err != nil {
+				errCh <- fmt.Errorf("could not load %s: %w", p, err)
+				return
+			}
+
+			resCh <- entry
+		}(path)
 	}
+
+	go func() {
+		wg.Wait()
+		close(resCh)
+		close(errCh)
+	}()
+
+	result := utils.Collect(resCh)
+	errs := utils.Collect(errCh)
 
 	return result, errors.Join(errs...)
 }
@@ -53,6 +76,7 @@ func filterEntries(entries []*Entry) []*Entry {
 	desktop := utils.XdgCurrentDesktop()
 
 	for _, entry := range entries {
+
 		if !isApplication(entry) {
 			continue
 		}
