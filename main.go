@@ -1,30 +1,16 @@
 package main
 
 import (
-	"log"
+	"fmt"
+	"os"
 
-	"github.com/b-swist/runny/internal/app"
-	"github.com/b-swist/runny/internal/modes/drun"
-	tea "github.com/charmbracelet/bubbletea"
+	"github.com/b-swist/runny/cmd"
 )
 
 func main() {
-	e, _ := drun.Entries()
-	p := tea.NewProgram(app.NewModel(e), tea.WithAltScreen())
-
-	fm, err := p.Run()
-	if err != nil {
-		log.Fatal("Error running program:", err)
+	if err := cmd.Main(); err != nil {
+		fmt.Fprintf(os.Stderr, "%v: %v\n", os.Args[0], err)
+		os.Exit(1)
 	}
-
-	m, ok := fm.(app.Model)
-	if !ok {
-		return
-	}
-
-	if e := m.ChosenEntry(); e != nil {
-		if err := e.Launch(); err != nil {
-			log.Fatal(err)
-		}
-	}
+	os.Exit(0)
 }

@@ -18,14 +18,14 @@ func (i item) Title() string       { return i.title }
 func (i item) Description() string { return i.desc }
 func (i item) FilterValue() string { return i.title }
 
-type Model struct {
+type model struct {
 	list        list.Model
 	chosenEntry modes.Entry
 }
 
-func (m *Model) ChosenEntry() modes.Entry { return m.chosenEntry }
+func (m *model) ChosenEntry() modes.Entry { return m.chosenEntry }
 
-func NewModel[E modes.Entry](entries []E) Model {
+func newModel[E modes.Entry](entries []E) model {
 	items := make([]list.Item, 0, len(entries))
 	for _, e := range entries {
 		items = append(items, item{
@@ -39,18 +39,18 @@ func NewModel[E modes.Entry](entries []E) Model {
 	modelList := list.New(items, delegate, 0, 0)
 	modelList.Title = "runny"
 
-	return Model{list: modelList}
+	return model{list: modelList}
 }
 
-func (m Model) Init() tea.Cmd {
+func (m model) Init() tea.Cmd {
 	return nil
 }
 
-func (m Model) View() string {
+func (m model) View() string {
 	return appStyle.Render(m.list.View())
 }
 
-func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		h, v := appStyle.GetFrameSize()
