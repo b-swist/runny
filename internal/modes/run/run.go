@@ -7,7 +7,6 @@ import (
 	"path/filepath"
 	"sync"
 
-	"github.com/b-swist/runny/internal/launcher"
 	"github.com/b-swist/runny/internal/utils"
 )
 
@@ -17,7 +16,7 @@ type RunEntry struct {
 
 func (e *RunEntry) DefaultName() string { return e.name }
 func (e *RunEntry) Description() string { return e.path }
-func (e *RunEntry) Launch() error       { return launcher.LaunchTerm([]string{e.path}) }
+func (e *RunEntry) Launch() error       { return utils.LaunchTerm([]string{e.path}) }
 
 func Entries() ([]*RunEntry, error) {
 	path := Path()
