@@ -4,14 +4,18 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"os"
 
 	"github.com/b-swist/runny/internal/app"
 	"github.com/b-swist/runny/internal/modes/drun"
 	"github.com/b-swist/runny/internal/modes/run"
 )
 
+var version = "v0.1.0"
+
 var (
 	help = flag.Bool("h", false, "Show help message")
+	ver  = flag.Bool("v", false, "Show program version")
 	mode = flag.String("m", "", "Specify a mode to launch")
 )
 
@@ -34,6 +38,8 @@ func Main() error {
 		return ErrTooManyArgs
 	case flag.NFlag() == 0, *help:
 		flag.PrintDefaults()
+	case *ver:
+		fmt.Printf("%v: %v\n", os.Args[0], version)
 	case *mode != "":
 		return handleMode(*mode)
 	}
