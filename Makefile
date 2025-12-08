@@ -4,7 +4,7 @@ PREFIX ?= /usr/local
 .PHONY: build run install clean
 
 build:
-	go build -o $(BINARY) runny.go
+	go build -o $(BINARY) main.go
 
 run: build
 	./$(BINARY)
