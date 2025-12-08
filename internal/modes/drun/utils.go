@@ -8,15 +8,15 @@ import (
 	"github.com/b-swist/runny/internal/utils"
 )
 
-func isApplication(e *Entry) bool {
+func (e *DrunEntry) isApplication() bool {
 	return e.Type == "Application"
 }
 
-func isHidden(e *Entry) bool {
+func (e *DrunEntry) isHidden() bool {
 	return e.NoDisplay || e.Hidden
 }
 
-func isExcluded(e *Entry, desktop []string) bool {
+func (e *DrunEntry) isExcluded(desktop []string) bool {
 	if len(desktop) == 0 {
 		return len(e.OnlyShowIn) > 0
 	}
@@ -28,23 +28,23 @@ func isExcluded(e *Entry, desktop []string) bool {
 	return utils.Intersects(e.NotShowIn, desktop)
 }
 
-func loadEntry(path string) (*Entry, error) {
+func loadEntry(path string) (*DrunEntry, error) {
 	entry, err := xdg.LoadFile(path)
 	if err != nil {
 		return nil, err
 	}
-	return entry, nil
+	return (*DrunEntry)(entry), nil
 }
 
-func StripFieldCodes(e xdg.ExecValue) []string {
+func stripFieldCodes(e xdg.ExecValue) []string {
 	return e.ToArguments(xdg.FieldCodeProvider{})
 }
 
-func sortEntries(entries []*Entry) {
-	slices.SortFunc(entries, func(a, b *Entry) int {
+func sortEntries(entries []*DrunEntry) {
+	slices.SortFunc(entries, func(a, b *DrunEntry) int {
 		return strings.Compare(
-			strings.ToLower(DefaultName(a)),
-			strings.ToLower(DefaultName(b)),
+			strings.ToLower(a.DefaultName()),
+			strings.ToLower(b.DefaultName()),
 		)
 	})
 }

@@ -2,6 +2,7 @@ package utils
 
 import (
 	"os"
+	"os/exec"
 	"path/filepath"
 	"slices"
 )
@@ -28,4 +29,17 @@ func Collect[T any](ch <-chan T) (result []T) {
 		result = append(result, v)
 	}
 	return
+}
+
+func FullPath(cmd string) (string, error) {
+	if filepath.IsAbs(cmd) {
+		return cmd, nil
+	}
+
+	path, err := exec.LookPath(cmd)
+	if err != nil {
+		return "", err
+	}
+
+	return path, nil
 }

@@ -1,7 +1,7 @@
 package app
 
 import (
-	drun "github.com/b-swist/runny/internal/drun"
+	"github.com/b-swist/runny/internal/modes"
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -11,7 +11,7 @@ var appStyle = lipgloss.NewStyle().Padding(1, 2)
 
 type item struct {
 	title, desc string
-	entry       *drun.Entry
+	entry       modes.Entry
 }
 
 func (i item) Title() string       { return i.title }
@@ -20,23 +20,17 @@ func (i item) FilterValue() string { return i.title }
 
 type Model struct {
 	list        list.Model
-	chosenEntry *drun.Entry
+	chosenEntry modes.Entry
 }
 
-func (m *Model) ChosenEntry() *drun.Entry { return m.chosenEntry }
+func (m *Model) ChosenEntry() modes.Entry { return m.chosenEntry }
 
-func NewModel() Model {
-
-	entries, err := drun.ApplicationEntries()
-	if err != nil {
-		panic(err)
-	}
-
+func NewModel[E modes.Entry](entries []E) Model {
 	items := make([]list.Item, 0, len(entries))
 	for _, e := range entries {
 		items = append(items, item{
-			title: drun.DefaultName(e),
-			desc:  drun.Description(e),
+			title: e.DefaultName(),
+			desc:  e.Description(),
 			entry: e,
 		})
 	}

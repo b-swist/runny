@@ -9,13 +9,11 @@ import (
 	"github.com/b-swist/runny/internal/utils"
 )
 
-type Entry = xdg.Entry
+type DrunEntry xdg.Entry
 
-func DefaultName(e *Entry) string {
-	return e.Name.Default
-}
+func (e *DrunEntry) DefaultName() string { return e.Name.Default }
 
-func Description(e *Entry) string {
+func (e *DrunEntry) Description() string {
 	if s := e.Comment; s.Default != "" {
 		return s.Default
 	}
@@ -25,7 +23,24 @@ func Description(e *Entry) string {
 	return "No description"
 }
 
-func AllEntries() ([]*Entry, error) {
+func (e *DrunEntry) Launch() error {
+	cmd := stripFieldCodes(e.Exec)
+	if e.Terminal {
+		if err := utils.LaunchTerm(cmd); err != nil {
+			return err
+		}
+	} else {
+		if err := utils.LaunchGui(cmd); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func Entries() ([]*DrunEntry, error) { return appEntries() }
+
+func allEntries() ([]*DrunEntry, error) {
 	entries, err := xdg.GetDesktopFiles(xdg.GetDesktopFileLocations())
 	if err != nil {
 		return nil, err
@@ -33,7 +48,7 @@ func AllEntries() ([]*Entry, error) {
 
 	count := len(entries)
 	var (
-		resCh = make(chan *Entry, count)
+		resCh = make(chan *DrunEntry, count)
 		errCh = make(chan error, count)
 		wg    sync.WaitGroup
 	)
@@ -71,19 +86,19 @@ func AllEntries() ([]*Entry, error) {
 	return result, errors.Join(errs...)
 }
 
-func filterEntries(entries []*Entry) []*Entry {
-	result := make([]*Entry, 0, len(entries))
+func filterEntries(entries []*DrunEntry) []*DrunEntry {
+	result := make([]*DrunEntry, 0, len(entries))
 	desktop := utils.XdgCurrentDesktop()
 
 	for _, entry := range entries {
 
-		if !isApplication(entry) {
+		if !entry.isApplication() {
 			continue
 		}
-		if isHidden(entry) {
+		if entry.isHidden() {
 			continue
 		}
-		if isExcluded(entry, desktop) {
+		if entry.isExcluded(desktop) {
 			continue
 		}
 
@@ -93,8 +108,8 @@ func filterEntries(entries []*Entry) []*Entry {
 	return result
 }
 
-func ApplicationEntries() ([]*Entry, error) {
-	entries, err := AllEntries()
+func appEntries() ([]*DrunEntry, error) {
+	entries, err := allEntries()
 	if err != nil {
 		return nil, err
 	}
