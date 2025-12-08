@@ -2,14 +2,30 @@
 
 Runny is a terminal-based application launcher for Linux, built in Go with [BubbleTea](https://github.com/charmbracelet/bubbletea) framework.
 
-# Instalation
+# Installation
+
+## From Source
 
 ```shell
     git clone https://github.com/b-swist/runny.git
     cd runny
+```
+
+Install system-wide:
+```shell
     sudo make install
 ```
-By default, the binary is copied to `/usr/local/bin/runny`. Ensure that `/usr/local/bin` is included in your `$PATH`.
+
+Alternatively, Install for a single user:
+```shell
+    make install PREFIX=~/.local
+```
+
+> [!IMPORTANT]
+> Ensure that the directory is in `$PATH` (example for `~/.local/bin`)
+> ```shell
+>   export PATH="$HOME/.local/bin:$PATH"
+> ```
 
 # Inspirations
 
