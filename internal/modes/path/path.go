@@ -1,4 +1,4 @@
-package run
+package path
 
 import (
 	"errors"
@@ -10,19 +10,19 @@ import (
 	"github.com/b-swist/runny/internal/utils"
 )
 
-type RunEntry struct {
+type PathModeEntry struct {
 	name, path string
 }
 
-func (e *RunEntry) DefaultName() string { return e.name }
-func (e *RunEntry) Description() string { return e.path }
-func (e *RunEntry) Launch() error       { return utils.LaunchTerm([]string{e.path}) }
+func (e *PathModeEntry) DefaultName() string { return e.name }
+func (e *PathModeEntry) Description() string { return e.path }
+func (e *PathModeEntry) Launch() error       { return utils.LaunchTerm([]string{e.path}) }
 
-func Entries() ([]*RunEntry, error) {
+func Entries() ([]*PathModeEntry, error) {
 	path := Path()
 
 	var (
-		resCh = make(chan *RunEntry, len(path))
+		resCh = make(chan *PathModeEntry, len(path))
 		errCh = make(chan error, len(path))
 		wg    sync.WaitGroup
 	)

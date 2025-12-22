@@ -1,4 +1,4 @@
-package run
+package path
 
 import (
 	"os"
@@ -23,8 +23,8 @@ func Path() []string {
 	return result
 }
 
-func newEntry(name, path string) *RunEntry {
-	return &RunEntry{
+func newEntry(name, path string) *PathModeEntry {
+	return &PathModeEntry{
 		name: name,
 		path: path,
 	}

@@ -1,4 +1,4 @@
-package drun
+package apps
 
 import (
 	"errors"
@@ -9,11 +9,11 @@ import (
 	"github.com/b-swist/runny/internal/utils"
 )
 
-type DrunEntry xdg.Entry
+type AppEntry xdg.Entry
 
-func (e *DrunEntry) DefaultName() string { return e.Name.Default }
+func (e *AppEntry) DefaultName() string { return e.Name.Default }
 
-func (e *DrunEntry) Description() string {
+func (e *AppEntry) Description() string {
 	if s := e.Comment; s.Default != "" {
 		return s.Default
 	}
@@ -23,7 +23,7 @@ func (e *DrunEntry) Description() string {
 	return "No description"
 }
 
-func (e *DrunEntry) Launch() error {
+func (e *AppEntry) Launch() error {
 	cmd := stripFieldCodes(e.Exec)
 	if e.Terminal {
 		if err := utils.LaunchTerm(cmd); err != nil {
@@ -38,9 +38,9 @@ func (e *DrunEntry) Launch() error {
 	return nil
 }
 
-func Entries() ([]*DrunEntry, error) { return appEntries() }
+func Entries() ([]*AppEntry, error) { return appEntries() }
 
-func allEntries() ([]*DrunEntry, error) {
+func allEntries() ([]*AppEntry, error) {
 	entries, err := xdg.GetDesktopFiles(xdg.GetDesktopFileLocations())
 	if err != nil {
 		return nil, err
@@ -48,7 +48,7 @@ func allEntries() ([]*DrunEntry, error) {
 
 	count := len(entries)
 	var (
-		resCh = make(chan *DrunEntry, count)
+		resCh = make(chan *AppEntry, count)
 		errCh = make(chan error, count)
 		wg    sync.WaitGroup
 	)
@@ -86,8 +86,8 @@ func allEntries() ([]*DrunEntry, error) {
 	return result, errors.Join(errs...)
 }
 
-func filterEntries(entries []*DrunEntry) []*DrunEntry {
-	result := make([]*DrunEntry, 0, len(entries))
+func filterEntries(entries []*AppEntry) []*AppEntry {
+	result := make([]*AppEntry, 0, len(entries))
 	desktop := utils.XdgCurrentDesktop()
 
 	for _, entry := range entries {
@@ -108,7 +108,7 @@ func filterEntries(entries []*DrunEntry) []*DrunEntry {
 	return result
 }
 
-func appEntries() ([]*DrunEntry, error) {
+func appEntries() ([]*AppEntry, error) {
 	entries, err := allEntries()
 	if err != nil {
 		return nil, err

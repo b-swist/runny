@@ -1,4 +1,4 @@
-package drun
+package apps
 
 import (
 	"slices"
@@ -8,15 +8,15 @@ import (
 	"github.com/b-swist/runny/internal/utils"
 )
 
-func (e *DrunEntry) isApplication() bool {
+func (e *AppEntry) isApplication() bool {
 	return e.Type == "Application"
 }
 
-func (e *DrunEntry) isHidden() bool {
+func (e *AppEntry) isHidden() bool {
 	return e.NoDisplay || e.Hidden
 }
 
-func (e *DrunEntry) isExcluded(desktop []string) bool {
+func (e *AppEntry) isExcluded(desktop []string) bool {
 	if len(desktop) == 0 {
 		return len(e.OnlyShowIn) > 0
 	}
@@ -28,20 +28,20 @@ func (e *DrunEntry) isExcluded(desktop []string) bool {
 	return utils.Intersects(e.NotShowIn, desktop)
 }
 
-func loadEntry(path string) (*DrunEntry, error) {
+func loadEntry(path string) (*AppEntry, error) {
 	entry, err := xdg.LoadFile(path)
 	if err != nil {
 		return nil, err
 	}
-	return (*DrunEntry)(entry), nil
+	return (*AppEntry)(entry), nil
 }
 
 func stripFieldCodes(e xdg.ExecValue) []string {
 	return e.ToArguments(xdg.FieldCodeProvider{})
 }
 
-func sortEntries(entries []*DrunEntry) {
-	slices.SortFunc(entries, func(a, b *DrunEntry) int {
+func sortEntries(entries []*AppEntry) {
+	slices.SortFunc(entries, func(a, b *AppEntry) int {
 		return strings.Compare(
 			strings.ToLower(a.DefaultName()),
 			strings.ToLower(b.DefaultName()),

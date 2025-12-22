@@ -7,8 +7,8 @@ import (
 	"os"
 
 	"github.com/b-swist/runny/internal/app"
-	"github.com/b-swist/runny/internal/modes/drun"
-	"github.com/b-swist/runny/internal/modes/run"
+	"github.com/b-swist/runny/internal/modes/apps"
+	"github.com/b-swist/runny/internal/modes/path"
 )
 
 var version = "v0.1.0"
@@ -20,8 +20,8 @@ var (
 )
 
 const (
-	ModeRun  = "run"
-	ModeDrun = "drun"
+	ModePath = "path"
+	ModeApps = "apps"
 )
 
 var (
@@ -47,13 +47,13 @@ func Main() error {
 	return nil
 }
 
-func handleMode(s string) error {
-	switch s {
-	case "run":
-		return app.Run(run.Entries)
-	case "drun":
-		return app.Run(drun.Entries)
+func handleMode(mode string) error {
+	switch mode {
+	case ModePath:
+		return app.Run(path.Entries)
+	case ModeApps:
+		return app.Run(apps.Entries)
 	default:
-		return fmt.Errorf("%w: %s", ErrInvalidMode, s)
+		return fmt.Errorf("%w: %s", ErrInvalidMode, mode)
 	}
 }

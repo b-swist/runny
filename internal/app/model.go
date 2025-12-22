@@ -23,7 +23,7 @@ type model struct {
 	chosenEntry modes.Entry
 }
 
-func (m *model) ChosenEntry() modes.Entry { return m.chosenEntry }
+func (m model) ChosenEntry() modes.Entry { return m.chosenEntry }
 
 func newModel[E modes.Entry](entries []E) model {
 	items := make([]list.Item, 0, len(entries))
