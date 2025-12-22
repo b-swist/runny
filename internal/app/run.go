@@ -2,23 +2,28 @@ package app
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/b-swist/runny/internal/modes"
+	"github.com/b-swist/runny/internal/utils"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-var logFile = "runny.log"
-
 func Run[E modes.Entry](entryFunc func() ([]E, error)) error {
+	logFile, err := utils.LogPath()
+	if err != nil {
+		return err
+	}
+
 	f, err := tea.LogToFile(logFile, "")
 	if err != nil {
-		return fmt.Errorf("open log file %s: %w", logFile, err)
+		return err
 	}
 	defer f.Close()
 
 	entries, err := entryFunc()
 	if err != nil {
-		_ = fmt.Errorf("warn: error getting entries: %w", err)
+		log.Printf("warn: error getting entries: %v", err)
 	}
 
 	p := tea.NewProgram(newModel(entries), tea.WithAltScreen())
