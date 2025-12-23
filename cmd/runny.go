@@ -11,7 +11,7 @@ import (
 	"github.com/b-swist/runny/internal/modes/path"
 )
 
-var version = "v0.1.0"
+var version = "v0.1.1"
 
 var (
 	help = flag.Bool("h", false, "Show help message")
