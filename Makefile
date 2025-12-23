@@ -1,13 +1,10 @@
 BINARY := runny
 PREFIX ?= /usr/local
 
-.PHONY: build run install clean
+.PHONY: build install clean
 
 build:
 	go build -o $(BINARY) main.go
-
-run: build
-	./$(BINARY)
 
 install: build
 	@install -Dm755 $(BINARY) ${DESTDIR}${PREFIX}/bin/${BINARY}
