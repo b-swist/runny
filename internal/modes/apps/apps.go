@@ -9,38 +9,7 @@ import (
 	"github.com/b-swist/runny/internal/utils"
 )
 
-type AppEntry xdg.Entry
-
-func (e *AppEntry) DefaultName() string { return e.Name.Default }
-
-func (e *AppEntry) Description() string {
-	if s := e.Comment; s.Default != "" {
-		return s.Default
-	}
-	if s := e.GenericName; s.Default != "" {
-		return s.Default
-	}
-	return "No description"
-}
-
-func (e *AppEntry) Launch() error {
-	cmd := stripFieldCodes(e.Exec)
-	if e.Terminal {
-		if err := utils.LaunchTerm(cmd); err != nil {
-			return err
-		}
-	} else {
-		if err := utils.LaunchGui(cmd); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func Entries() ([]*AppEntry, error) { return appEntries() }
-
-func allEntries() ([]*AppEntry, error) {
+func allEntries() ([]*xdg.Entry, error) {
 	entries, err := xdg.GetDesktopFiles(xdg.GetDesktopFileLocations())
 	if err != nil {
 		return nil, err
@@ -48,7 +17,7 @@ func allEntries() ([]*AppEntry, error) {
 
 	count := len(entries)
 	var (
-		resCh = make(chan *AppEntry, count)
+		resCh = make(chan *xdg.Entry, count)
 		errCh = make(chan error, count)
 		wg    sync.WaitGroup
 	)
@@ -86,29 +55,9 @@ func allEntries() ([]*AppEntry, error) {
 	return result, errors.Join(errs...)
 }
 
-func filterEntries(entries []*AppEntry) []*AppEntry {
-	result := make([]*AppEntry, 0, len(entries))
-	desktop := utils.XdgCurrentDesktop()
+type AppEntry xdg.Entry
 
-	for _, entry := range entries {
-
-		if !entry.isApplication() {
-			continue
-		}
-		if entry.isHidden() {
-			continue
-		}
-		if entry.isExcluded(desktop) {
-			continue
-		}
-
-		result = append(result, entry)
-	}
-
-	return result
-}
-
-func appEntries() ([]*AppEntry, error) {
+func AppEntries() ([]*AppEntry, error) {
 	entries, err := allEntries()
 	if err != nil {
 		return nil, err
@@ -116,4 +65,58 @@ func appEntries() ([]*AppEntry, error) {
 	filtered := filterEntries(entries)
 	sortEntries(filtered)
 	return filtered, nil
+}
+
+func filterEntries(entries []*xdg.Entry) []*AppEntry {
+	result := make([]*AppEntry, 0, len(entries))
+	desktop := utils.XdgCurrentDesktop()
+
+	for _, entry := range entries {
+
+		if !isApplication(entry) {
+			continue
+		}
+
+		app := (*AppEntry)(entry)
+
+		if app.isHidden() {
+			continue
+		}
+		if app.isExcluded(desktop) {
+			continue
+		}
+
+		result = append(result, app)
+	}
+
+	return result
+}
+
+func (e AppEntry) DefaultName() string { return e.Name.Default }
+func (e AppEntry) Title() string       { return e.DefaultName() }
+func (e AppEntry) FilterValue() string { return e.Title() }
+
+func (e AppEntry) Description() string {
+	if s := e.Comment; s.Default != "" {
+		return s.Default
+	}
+	if s := e.GenericName; s.Default != "" {
+		return s.Default
+	}
+	return "No description"
+}
+
+func (e AppEntry) Launch() error {
+	cmd := stripFieldCodes(e.Exec)
+	if e.Terminal {
+		if err := utils.LaunchTerm(cmd); err != nil {
+			return err
+		}
+	} else {
+		if err := utils.LaunchGui(cmd); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

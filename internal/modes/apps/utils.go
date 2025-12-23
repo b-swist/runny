@@ -8,7 +8,7 @@ import (
 	"github.com/b-swist/runny/internal/utils"
 )
 
-func (e *AppEntry) isApplication() bool {
+func isApplication(e *xdg.Entry) bool {
 	return e.Type == "Application"
 }
 
@@ -28,12 +28,12 @@ func (e *AppEntry) isExcluded(desktop []string) bool {
 	return utils.Intersects(e.NotShowIn, desktop)
 }
 
-func loadEntry(path string) (*AppEntry, error) {
+func loadEntry(path string) (*xdg.Entry, error) {
 	entry, err := xdg.LoadFile(path)
 	if err != nil {
 		return nil, err
 	}
-	return (*AppEntry)(entry), nil
+	return (*xdg.Entry)(entry), nil
 }
 
 func stripFieldCodes(e xdg.ExecValue) []string {

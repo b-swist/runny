@@ -1,63 +1,55 @@
 package app
 
 import (
-	"github.com/b-swist/runny/internal/modes"
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 )
 
-var appStyle = lipgloss.NewStyle().Padding(1, 2)
-
-type item struct {
-	title, desc string
-	entry       modes.Entry
+type Model struct {
+	list   list.Model
+	chosen Item
 }
 
-func (i item) Title() string       { return i.title }
-func (i item) Description() string { return i.desc }
-func (i item) FilterValue() string { return i.title }
-
-type model struct {
-	list        list.Model
-	chosenEntry modes.Entry
+type Item interface {
+	list.Item
+	Launch() error
 }
 
-func (m model) ChosenEntry() modes.Entry { return m.chosenEntry }
-
-func newModel[E modes.Entry](entries []E) model {
-	items := make([]list.Item, 0, len(entries))
-	for _, e := range entries {
-		items = append(items, item{
-			title: e.DefaultName(),
-			desc:  e.Description(),
-			entry: e,
-		})
+func NewModel[I Item](items []I, delegate list.DefaultDelegate) *Model {
+	modelItems := make([]list.Item, 0, len(items))
+	for _, i := range items {
+		modelItems = append(modelItems, i)
 	}
 
-	delegate := newItemDelegate(newDelegateKeyMap())
-	modelList := list.New(items, delegate, 0, 0)
+	modelList := list.New(modelItems, delegate, 0, 0)
 	modelList.Title = "runny"
 
-	return model{list: modelList}
+	return &Model{list: modelList}
 }
 
-func (m model) Init() tea.Cmd {
-	return nil
+func (m Model) ChosenEntry() Item { return Item(m.chosen) }
+func (m Model) Init() tea.Cmd     { return func() tea.Msg { return FocusFilterMsg{} } }
+func (m Model) View() string      { return AppStyle.Render(m.list.View()) }
+func (m *Model) focusFilter() {
+	m.list.SetFilterText("")
+	m.list.SetFilterState(list.Filtering)
 }
 
-func (m model) View() string {
-	return appStyle.Render(m.list.View())
-}
+type ChosenItemMsg = Item
+type FocusFilterMsg struct{}
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
-		h, v := appStyle.GetFrameSize()
+		h, v := AppStyle.GetFrameSize()
 		m.list.SetSize(msg.Width-h, msg.Height-v)
-	case chosenEntryMsg:
-		m.chosenEntry = msg
+
+	case ChosenItemMsg:
+		m.chosen = msg
 		return m, tea.Quit
+
+	case FocusFilterMsg:
+		m.focusFilter()
 	}
 
 	var cmd tea.Cmd

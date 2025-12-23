@@ -1,24 +1,25 @@
-package app
+package apps
 
 import (
-	"github.com/b-swist/runny/internal/modes"
+	"github.com/b-swist/runny/internal/app"
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-type chosenEntryMsg modes.Entry
-
 func chosenItem(m *list.Model) tea.Cmd {
-	it, ok := m.SelectedItem().(item)
+	entry, ok := m.SelectedItem().(*AppEntry)
 	if !ok {
 		return nil
 	}
 
-	chosen := it.entry
 	return func() tea.Msg {
-		return chosenEntryMsg(chosen)
+		return app.ChosenItemMsg(entry)
 	}
+}
+
+func DefaultDelegate() list.DefaultDelegate {
+	return newItemDelegate(newDelegateKeyMap())
 }
 
 func newItemDelegate(keys *delegateKeyMap) list.DefaultDelegate {

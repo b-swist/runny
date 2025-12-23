@@ -26,7 +26,6 @@ const (
 
 var (
 	ErrTooManyArgs = errors.New("too many arguments provided")
-	ErrNoArgs      = errors.New("no arguments provided")
 	ErrInvalidMode = errors.New("invalid mode provided")
 )
 
@@ -50,9 +49,22 @@ func Main() error {
 func handleMode(mode string) error {
 	switch mode {
 	case ModePath:
-		return app.Run(path.Entries)
+		entries, err := path.Entries()
+		if err != nil {
+			return err
+		}
+		items := path.GenerateItems(entries)
+		model := app.NewModel(items, path.DefaultDelegate())
+		return app.Run(model)
+
 	case ModeApps:
-		return app.Run(apps.Entries)
+		items, err := apps.AppEntries()
+		if err != nil {
+			return err
+		}
+		model := app.NewModel(items, apps.DefaultDelegate())
+		return app.Run(model)
+
 	default:
 		return fmt.Errorf("%w: %s", ErrInvalidMode, mode)
 	}

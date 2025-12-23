@@ -4,12 +4,11 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/b-swist/runny/internal/modes"
 	"github.com/b-swist/runny/internal/utils"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func Run[E modes.Entry](entryFunc func() ([]E, error)) error {
+func Run(model tea.Model) error {
 	logFile, err := utils.LogPath()
 	if err != nil {
 		return err
@@ -21,22 +20,19 @@ func Run[E modes.Entry](entryFunc func() ([]E, error)) error {
 	}
 	defer f.Close()
 
-	entries, err := entryFunc()
-	if err != nil {
-		log.Printf("warn: error getting entries: %v", err)
-	}
-
-	p := tea.NewProgram(newModel(entries), tea.WithAltScreen())
+	p := tea.NewProgram(model, tea.WithAltScreen())
 
 	fm, err := p.Run()
 	if err != nil {
 		return fmt.Errorf("error running program: %w", err)
 	}
 
-	m, ok := fm.(model)
+	m, ok := fm.(Model)
 	if !ok {
 		return fmt.Errorf("unexpected final model type: %T", fm)
 	}
+
+	log.Println("debug:", "model implements the interface")
 
 	if e := m.ChosenEntry(); e != nil {
 		if err := e.Launch(); err != nil {

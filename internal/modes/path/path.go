@@ -5,26 +5,26 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"sync"
 
 	"github.com/b-swist/runny/internal/utils"
 )
 
-type PathModeEntry struct {
-	name, path string
+type pathEntry struct {
+	name string
+	path []string
 }
 
-func (e *PathModeEntry) DefaultName() string { return e.name }
-func (e *PathModeEntry) Description() string { return e.path }
-func (e *PathModeEntry) Launch() error       { return utils.LaunchTerm([]string{e.path}) }
+func (e *pathEntry) Name() string { return e.name }
+func (e *pathEntry) Launch(idx int) error {
+	return utils.LaunchTerm([]string{e.path[idx]})
+}
 
-func Entries() ([]*PathModeEntry, error) {
+func Entries() ([]*pathEntry, error) {
 	path := Path()
 
 	var (
-		resCh = make(chan *PathModeEntry, len(path))
-		errCh = make(chan error, len(path))
-		wg    sync.WaitGroup
+		collect = make(map[string][]string)
+		errs    = make([]error, 0)
 	)
 
 	for _, d := range path {
@@ -34,46 +34,38 @@ func Entries() ([]*PathModeEntry, error) {
 
 		entries, err := os.ReadDir(d)
 		if err != nil {
-			errCh <- fmt.Errorf("error reading dir %s: %w", d, err)
+			errs = append(errs, fmt.Errorf("error reading dir %s: %w", d, err))
 			continue
 		}
 
-		for _, entry := range entries {
-			wg.Add(1)
-			go func(e os.DirEntry) {
-				defer wg.Done()
+		for _, e := range entries {
+			info, err := e.Info()
+			if err != nil {
+				errs = append(errs, fmt.Errorf("error reading info of %s: %w", e, err))
+				continue
+			}
 
-				info, err := e.Info()
-				if err != nil {
-					errCh <- fmt.Errorf("error reading info of %s: %w", e, err)
-					return
-				}
+			if info.IsDir() {
+				continue
+			}
+			if !isExecutable(info) {
+				continue
+			}
 
-				if info.IsDir() {
-					return
-				}
-				if !isExecutable(info) {
-					return
-				}
-
-				resCh <- newEntry(
-					info.Name(),
-					filepath.Join(d, info.Name()),
-				)
-			}(entry)
+			name := info.Name()
+			collect[name] = append(
+				collect[name],
+				filepath.Join(d, name),
+			)
 		}
 	}
 
-	go func() {
-		wg.Wait()
-		close(resCh)
-		close(errCh)
-	}()
+	result := make([]*pathEntry, 0, len(collect))
+	for k, v := range collect {
+		result = append(result, newEntry(k, v))
+	}
 
-	var (
-		result = utils.Collect(resCh)
-		errs   = utils.Collect(errCh)
-	)
+	sortEntries(result)
 
 	return result, errors.Join(errs...)
 }

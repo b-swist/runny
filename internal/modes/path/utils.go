@@ -3,6 +3,8 @@ package path
 import (
 	"os"
 	"path/filepath"
+	"slices"
+	"strings"
 )
 
 func isExecutable(f os.FileInfo) bool {
@@ -23,9 +25,18 @@ func Path() []string {
 	return result
 }
 
-func newEntry(name, path string) *PathModeEntry {
-	return &PathModeEntry{
+func newEntry(name string, path []string) *pathEntry {
+	return &pathEntry{
 		name: name,
 		path: path,
 	}
+}
+
+func sortEntries(entries []*pathEntry) {
+	slices.SortFunc(entries, func(a, b *pathEntry) int {
+		return strings.Compare(
+			strings.ToLower(a.Name()),
+			strings.ToLower(b.Name()),
+		)
+	})
 }
