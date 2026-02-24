@@ -7,7 +7,7 @@ Runny is a terminal-based application launcher for Linux, built in Go with [Bubb
 ## With Go
 
 ```shell
-    go install github.com/b-swist/runny@v0.1.1
+    go install github.com/b-swist/runny@v0.2.0
 ```
 
 ## From Source

@@ -10,7 +10,7 @@ import (
 	"github.com/b-swist/runny/internal/entries"
 )
 
-var version = "v0.1.1"
+var version = "v0.2.0"
 
 var (
 	help = flag.Bool("h", false, "Show help message")
