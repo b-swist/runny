@@ -1,6 +1,6 @@
 # About
 
-Runny is a terminal-based application launcher for Linux, built in Go with [BubbleTea](https://charm.land/bubbletea/v2) framework.
+Runny is a terminal-based application launcher for Linux, built in Go with [BubbleTea](https://github.com/charmbracelet/bubbletea) framework.
 
 # Installation
 
