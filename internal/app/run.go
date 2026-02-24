@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"log"
 
+	tea "charm.land/bubbletea/v2"
 	"github.com/b-swist/runny/internal/utils"
-	tea "github.com/charmbracelet/bubbletea"
 )
 
 func Run(model tea.Model) error {
@@ -20,7 +20,7 @@ func Run(model tea.Model) error {
 	}
 	defer f.Close()
 
-	p := tea.NewProgram(model, tea.WithAltScreen())
+	p := tea.NewProgram(model)
 
 	fm, err := p.Run()
 	if err != nil {

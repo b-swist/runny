@@ -1,14 +1,14 @@
-package apps
+package entries
 
 import (
+	"charm.land/bubbles/v2/key"
+	"charm.land/bubbles/v2/list"
+	tea "charm.land/bubbletea/v2"
 	"github.com/b-swist/runny/internal/app"
-	"github.com/charmbracelet/bubbles/key"
-	"github.com/charmbracelet/bubbles/list"
-	tea "github.com/charmbracelet/bubbletea"
 )
 
 func chosenItem(m *list.Model) tea.Cmd {
-	entry, ok := m.SelectedItem().(*AppEntry)
+	entry, ok := m.SelectedItem().(*Entry)
 	if !ok {
 		return nil
 	}

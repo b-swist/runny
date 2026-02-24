@@ -1,8 +1,8 @@
 package app
 
 import (
-	"github.com/charmbracelet/bubbles/list"
-	tea "github.com/charmbracelet/bubbletea"
+	"charm.land/bubbles/v2/list"
+	tea "charm.land/bubbletea/v2"
 )
 
 type Model struct {
@@ -29,7 +29,14 @@ func NewModel[I Item](items []I, delegate list.DefaultDelegate) *Model {
 
 func (m Model) ChosenEntry() Item { return Item(m.chosen) }
 func (m Model) Init() tea.Cmd     { return func() tea.Msg { return FocusFilterMsg{} } }
-func (m Model) View() string      { return AppStyle.Render(m.list.View()) }
+
+func (m Model) View() tea.View {
+	r := AppStyle.Render(m.list.View())
+	v := tea.NewView(r)
+	v.AltScreen = true
+	return v
+}
+
 func (m *Model) focusFilter() {
 	m.list.SetFilterText("")
 	m.list.SetFilterState(list.Filtering)

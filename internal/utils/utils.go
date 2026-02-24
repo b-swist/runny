@@ -43,13 +43,6 @@ func Intersects[T comparable](a, b []T) bool {
 	return false
 }
 
-func Collect[T any](ch <-chan T) (result []T) {
-	for v := range ch {
-		result = append(result, v)
-	}
-	return
-}
-
 func FullPath(cmd string) (string, error) {
 	if filepath.IsAbs(cmd) {
 		return cmd, nil

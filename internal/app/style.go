@@ -1,5 +1,5 @@
 package app
 
-import "github.com/charmbracelet/lipgloss"
+import "charm.land/lipgloss/v2"
 
 var AppStyle = lipgloss.NewStyle().Padding(1, 2)
