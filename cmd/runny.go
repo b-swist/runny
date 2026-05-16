@@ -35,6 +35,6 @@ func Main() error {
 	if err != nil {
 		return err
 	}
-	model := app.NewModel(items, entries.DefaultDelegate())
+	model := app.NewModel(items, app.DefaultDelegate())
 	return app.Run(model)
 }
