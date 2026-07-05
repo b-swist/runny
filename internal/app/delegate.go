@@ -17,14 +17,15 @@ func chosenItem(m *list.Model) tea.Cmd {
 	}
 }
 
-func DefaultDelegate() list.DefaultDelegate {
-	return newItemDelegate(newDelegateKeyMap())
+func DefaultDelegate(showDesc bool) list.DefaultDelegate {
+	return newItemDelegate(newDelegateKeyMap(), showDesc)
 }
 
-func newItemDelegate(keys *delegateKeyMap) list.DefaultDelegate {
+func newItemDelegate(keys *delegateKeyMap, showDesc bool) list.DefaultDelegate {
 	d := list.NewDefaultDelegate()
 	d.ShortHelpFunc = keys.ShortHelp
 	d.FullHelpFunc = keys.FullHelp
+	d.ShowDescription = showDesc
 
 	d.UpdateFunc = func(msg tea.Msg, m *list.Model) tea.Cmd {
 
