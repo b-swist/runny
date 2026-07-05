@@ -31,7 +31,7 @@ func Main() error {
 		fmt.Printf("%v: %v\n", os.Args[0], version)
 	}
 
-	items, err := entries.AppEntries()
+	items, err := entries.Entries()
 	if err != nil {
 		return err
 	}

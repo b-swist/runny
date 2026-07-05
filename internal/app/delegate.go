@@ -4,11 +4,10 @@ import (
 	"charm.land/bubbles/v2/key"
 	"charm.land/bubbles/v2/list"
 	tea "charm.land/bubbletea/v2"
-	"github.com/b-swist/runny/internal/entries"
 )
 
 func chosenItem(m *list.Model) tea.Cmd {
-	entry, ok := m.SelectedItem().(*entries.Entry)
+	entry, ok := m.SelectedItem().(Item)
 	if !ok {
 		return nil
 	}

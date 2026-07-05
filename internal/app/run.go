@@ -2,7 +2,6 @@ package app
 
 import (
 	"fmt"
-	"log"
 
 	tea "charm.land/bubbletea/v2"
 	"github.com/b-swist/runny/internal/utils"
@@ -32,10 +31,8 @@ func Run(model tea.Model) error {
 		return fmt.Errorf("unexpected final model type: %T", fm)
 	}
 
-	log.Println("debug:", "model implements the interface")
-
 	if e := m.ChosenEntry(); e != nil {
-		if err := e.Launch(); err != nil {
+		if err := e.Action(); err != nil {
 			return fmt.Errorf("failed to run entry: %w", err)
 		}
 	}

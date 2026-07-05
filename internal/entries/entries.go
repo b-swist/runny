@@ -3,19 +3,55 @@ package entries
 import (
 	"errors"
 	"fmt"
+	"slices"
+	"strings"
 
-	xdg "github.com/MatthiasKunnen/xdg/desktop"
+	"github.com/MatthiasKunnen/xdg/desktop"
 	"github.com/b-swist/runny/internal/utils"
 )
 
-func allEntries() ([]*xdg.Entry, error) {
-	entries, err := xdg.GetDesktopFiles(xdg.GetDesktopFileLocations())
+type DesktopEntry desktop.Entry
+
+func (e *DesktopEntry) FilterValue() string { return e.Title() }
+func (e *DesktopEntry) Title() string       { return e.Name.Default }
+func (e *DesktopEntry) Action() error       { return e.launch() }
+
+func (e DesktopEntry) Description() string {
+	if e.Comment.Default != "" {
+		return e.Comment.Default
+	}
+	if e.GenericName.Default != "" {
+		return e.GenericName.Default
+	}
+	return "No description"
+}
+
+func Entries() ([]*DesktopEntry, error) {
+	entries, err := loadAllEntries()
+	if err != nil {
+		return nil, err
+	}
+	filtered := filterVisibleEntries(entries)
+	sortEntriesByName(filtered)
+	return filtered, nil
+}
+
+func loadEntry(path string) (*DesktopEntry, error) {
+	entry, err := desktop.LoadFile(path)
+	if err != nil {
+		return nil, err
+	}
+	return (*DesktopEntry)(entry), nil
+}
+
+func loadAllEntries() ([]*DesktopEntry, error) {
+	entries, err := desktop.GetDesktopFiles(desktop.GetDesktopFileLocations())
 	if err != nil {
 		return nil, err
 	}
 
 	var (
-		result = make([]*xdg.Entry, 0, len(entries))
+		result = make([]*DesktopEntry, 0, len(entries))
 		errs   = make([]error, 0)
 	)
 
@@ -38,58 +74,30 @@ func allEntries() ([]*xdg.Entry, error) {
 	return result, errors.Join(errs...)
 }
 
-type Entry xdg.Entry
-
-func AppEntries() ([]*Entry, error) {
-	entries, err := allEntries()
-	if err != nil {
-		return nil, err
-	}
-	filtered := filterEntries(entries)
-	sortEntries(filtered)
-	return filtered, nil
-}
-
-func filterEntries(entries []*xdg.Entry) []*Entry {
-	result := make([]*Entry, 0, len(entries))
+func filterVisibleEntries(entries []*DesktopEntry) []*DesktopEntry {
+	result := make([]*DesktopEntry, 0, len(entries))
 	desktop := utils.XdgCurrentDesktop()
 
 	for _, e := range entries {
 
-		if !isApplication(e) {
+		if !e.isApplication() {
 			continue
 		}
 
-		entry := (*Entry)(e)
-
-		if entry.isHidden() {
+		if e.isHidden() {
 			continue
 		}
-		if entry.isExcluded(desktop) {
+		if e.isExcluded(desktop) {
 			continue
 		}
 
-		result = append(result, entry)
+		result = append(result, e)
 	}
 
 	return result
 }
 
-func (e Entry) DefaultName() string { return e.Name.Default }
-func (e Entry) Title() string       { return e.DefaultName() }
-func (e Entry) FilterValue() string { return e.Title() }
-
-func (e Entry) Description() string {
-	if s := e.Comment; s.Default != "" {
-		return s.Default
-	}
-	if s := e.GenericName; s.Default != "" {
-		return s.Default
-	}
-	return "No description"
-}
-
-func (e Entry) Launch() error {
+func (e *DesktopEntry) launch() error {
 	cmd := stripFieldCodes(e.Exec)
 	if e.Terminal {
 		if err := utils.LaunchTerm(cmd); err != nil {
@@ -102,4 +110,37 @@ func (e Entry) Launch() error {
 	}
 
 	return nil
+}
+
+func (e *DesktopEntry) isApplication() bool {
+	return e.Type == "Application"
+}
+
+func (e *DesktopEntry) isHidden() bool {
+	return e.NoDisplay || e.Hidden
+}
+
+func (e *DesktopEntry) isExcluded(desktop []string) bool {
+	if len(desktop) == 0 {
+		return len(e.OnlyShowIn) > 0
+	}
+
+	if len(e.OnlyShowIn) > 0 {
+		return !utils.Intersects(e.OnlyShowIn, desktop)
+	}
+
+	return utils.Intersects(e.NotShowIn, desktop)
+}
+
+func stripFieldCodes(e desktop.ExecValue) []string {
+	return e.ToArguments(desktop.FieldCodeProvider{})
+}
+
+func sortEntriesByName(entries []*DesktopEntry) {
+	slices.SortFunc(entries, func(a, b *DesktopEntry) int {
+		return strings.Compare(
+			strings.ToLower(a.Title()),
+			strings.ToLower(b.Title()),
+		)
+	})
 }

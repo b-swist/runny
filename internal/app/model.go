@@ -12,7 +12,7 @@ type Model struct {
 
 type Item interface {
 	list.Item
-	Launch() error
+	Action() error
 }
 
 func NewModel[I Item](items []I, delegate list.DefaultDelegate) *Model {
