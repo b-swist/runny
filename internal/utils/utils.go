@@ -1,11 +1,22 @@
 package utils
 
 import (
+	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"slices"
 )
+
+func ReadStdin() ([]byte, error) {
+	data, err := io.ReadAll(os.Stdin)
+	if err != nil {
+		return nil, fmt.Errorf("error reading from stdin: %w", err)
+	}
+
+	return data, nil
+}
 
 func XDGCurrentDesktop() []string {
 	env, ok := os.LookupEnv("XDG_CURRENT_DIR")
