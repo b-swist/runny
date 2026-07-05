@@ -15,14 +15,15 @@ type Item interface {
 	Action() error
 }
 
-func NewModel[I Item](items []I, delegate list.DefaultDelegate) *Model {
+func NewModel[I Item](items []I, cfg *modelConfig) *Model {
 	modelItems := make([]list.Item, 0, len(items))
 	for _, i := range items {
 		modelItems = append(modelItems, i)
 	}
 
+	delegate := DefaultDelegate(cfg.showDescription)
 	modelList := list.New(modelItems, delegate, 0, 0)
-	modelList.Title = "runny"
+	modelList.Title = cfg.prompt
 
 	return &Model{list: modelList}
 }

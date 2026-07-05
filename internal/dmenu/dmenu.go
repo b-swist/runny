@@ -20,15 +20,18 @@ func (e *DmenuEntry) Action() error {
 	return err
 }
 
-func Entries() ([]*DmenuEntry, error) {
-	data, err := utils.ReadStdin()
-	if err != nil {
-		return nil, err
+func Entries(input string, delim string) ([]*DmenuEntry, error) {
+	var options []string
+
+	if input != "" {
+		options = strings.Split(strings.TrimSpace(input), delim)
+	} else {
+		data, err := utils.ReadStdin()
+		if err != nil {
+			return nil, err
+		}
+		options = strings.Split(strings.TrimSpace(string(data)), delim)
 	}
-
-	const DELIM = "\n"
-
-	options := strings.Split(strings.TrimSpace(string(data)), DELIM)
 
 	entries := make([]*DmenuEntry, 0, len(options))
 

@@ -10,13 +10,13 @@ import (
 	"github.com/b-swist/runny/internal/utils"
 )
 
-type DesktopEntry desktop.Entry
+type desktopEntry desktop.Entry
 
-func (e *DesktopEntry) FilterValue() string { return e.Title() }
-func (e *DesktopEntry) Title() string       { return e.Name.Default }
-func (e *DesktopEntry) Action() error       { return e.launch() }
+func (e *desktopEntry) FilterValue() string { return e.Title() }
+func (e *desktopEntry) Title() string       { return e.Name.Default }
+func (e *desktopEntry) Action() error       { return e.launch() }
 
-func (e DesktopEntry) Description() string {
+func (e desktopEntry) Description() string {
 	if e.Comment.Default != "" {
 		return e.Comment.Default
 	}
@@ -26,7 +26,7 @@ func (e DesktopEntry) Description() string {
 	return "No description"
 }
 
-func Entries() ([]*DesktopEntry, error) {
+func Entries() ([]*desktopEntry, error) {
 	entries, err := loadAllEntries()
 	if err != nil {
 		return nil, err
@@ -36,22 +36,22 @@ func Entries() ([]*DesktopEntry, error) {
 	return filtered, nil
 }
 
-func loadEntry(path string) (*DesktopEntry, error) {
+func loadEntry(path string) (*desktopEntry, error) {
 	entry, err := desktop.LoadFile(path)
 	if err != nil {
 		return nil, err
 	}
-	return (*DesktopEntry)(entry), nil
+	return (*desktopEntry)(entry), nil
 }
 
-func loadAllEntries() ([]*DesktopEntry, error) {
+func loadAllEntries() ([]*desktopEntry, error) {
 	entries, err := desktop.GetDesktopFiles(desktop.GetDesktopFileLocations())
 	if err != nil {
 		return nil, err
 	}
 
 	var (
-		result = make([]*DesktopEntry, 0, len(entries))
+		result = make([]*desktopEntry, 0, len(entries))
 		errs   = make([]error, 0)
 	)
 
@@ -74,8 +74,8 @@ func loadAllEntries() ([]*DesktopEntry, error) {
 	return result, errors.Join(errs...)
 }
 
-func filterVisibleEntries(entries []*DesktopEntry) []*DesktopEntry {
-	result := make([]*DesktopEntry, 0, len(entries))
+func filterVisibleEntries(entries []*desktopEntry) []*desktopEntry {
+	result := make([]*desktopEntry, 0, len(entries))
 	desktop := utils.XDGCurrentDesktop()
 
 	for _, e := range entries {
@@ -97,7 +97,7 @@ func filterVisibleEntries(entries []*DesktopEntry) []*DesktopEntry {
 	return result
 }
 
-func (e *DesktopEntry) launch() error {
+func (e *desktopEntry) launch() error {
 	cmd := stripFieldCodes(e.Exec)
 	if e.Terminal {
 		if err := utils.LaunchTerm(cmd); err != nil {
@@ -112,15 +112,15 @@ func (e *DesktopEntry) launch() error {
 	return nil
 }
 
-func (e *DesktopEntry) isApplication() bool {
+func (e *desktopEntry) isApplication() bool {
 	return e.Type == "Application"
 }
 
-func (e *DesktopEntry) isHidden() bool {
+func (e *desktopEntry) isHidden() bool {
 	return e.NoDisplay || e.Hidden
 }
 
-func (e *DesktopEntry) isExcluded(desktop []string) bool {
+func (e *desktopEntry) isExcluded(desktop []string) bool {
 	if len(desktop) == 0 {
 		return len(e.OnlyShowIn) > 0
 	}
@@ -136,8 +136,8 @@ func stripFieldCodes(e desktop.ExecValue) []string {
 	return e.ToArguments(desktop.FieldCodeProvider{})
 }
 
-func sortEntriesByName(entries []*DesktopEntry) {
-	slices.SortFunc(entries, func(a, b *DesktopEntry) int {
+func sortEntriesByName(entries []*desktopEntry) {
+	slices.SortFunc(entries, func(a, b *desktopEntry) int {
 		return strings.Compare(
 			strings.ToLower(a.Title()),
 			strings.ToLower(b.Title()),
