@@ -10,12 +10,15 @@ import (
 )
 
 func LogFile() (string, error) {
-	dir, err := XDGDataHome()
+	env, err := XDGStateHome()
 	if err != nil {
 		return "", err
 	}
 
-	f := filepath.Join(dir, "runny", "runny.log")
+	dir := filepath.Join(env, "runny")
+	mkdir(dir)
+
+	f := filepath.Join(dir, "runny.log")
 
 	return f, nil
 }
@@ -49,4 +52,12 @@ func FullPath(cmd string) (string, error) {
 	}
 
 	return path, nil
+}
+
+func mkdir(dir string) error {
+	err := os.MkdirAll(dir, 0o775)
+	if err != nil {
+		return err
+	}
+	return nil
 }

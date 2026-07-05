@@ -13,8 +13,8 @@ func XDGCurrentDesktop() []string {
 	return filepath.SplitList(env)
 }
 
-func XDGDataHome() (string, error) {
-	dir := os.Getenv("XDG_DATA_HOME")
+func XDGStateHome() (string, error) {
+	dir := os.Getenv("XDG_STATE_HOME")
 
 	if dir == "" || !filepath.IsAbs(dir) {
 		home, err := os.UserHomeDir()
@@ -23,10 +23,6 @@ func XDGDataHome() (string, error) {
 		}
 
 		dir = filepath.Join(home, ".share", "local")
-	}
-
-	if err := os.MkdirAll(dir, 0o775); err != nil {
-		return "", err
 	}
 
 	return dir, nil
