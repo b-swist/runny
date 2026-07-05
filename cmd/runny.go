@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"github.com/b-swist/runny/internal/app"
-	"github.com/b-swist/runny/internal/entries"
+	"github.com/b-swist/runny/internal/xdg"
 )
 
 var version = "v0.2.0"
@@ -31,7 +31,7 @@ func Main() error {
 		fmt.Printf("%v: %v\n", os.Args[0], version)
 	}
 
-	items, err := entries.Entries()
+	items, err := xdg.Entries()
 	if err != nil {
 		return err
 	}
