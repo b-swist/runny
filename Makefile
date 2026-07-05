@@ -9,8 +9,5 @@ build:
 install: build
 	@install -Dm755 $(BINARY) ${DESTDIR}${PREFIX}/bin/${BINARY}
 
-run:
-	go run main.go
-
 clean:
 	rm -f $(BINARY)
