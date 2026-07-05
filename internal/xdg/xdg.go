@@ -76,7 +76,7 @@ func loadAllEntries() ([]*DesktopEntry, error) {
 
 func filterVisibleEntries(entries []*DesktopEntry) []*DesktopEntry {
 	result := make([]*DesktopEntry, 0, len(entries))
-	desktop := utils.XdgCurrentDesktop()
+	desktop := utils.XDGCurrentDesktop()
 
 	for _, e := range entries {
 

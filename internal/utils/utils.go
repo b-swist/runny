@@ -7,7 +7,7 @@ import (
 	"slices"
 )
 
-func XdgCurrentDesktop() []string {
+func XDGCurrentDesktop() []string {
 	env, ok := os.LookupEnv("XDG_CURRENT_DIR")
 	if !ok {
 		return nil
