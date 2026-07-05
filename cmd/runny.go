@@ -11,7 +11,7 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-var version = "v0.2.0"
+var version = "v0.3.0"
 
 func Main() error {
 	cmd := &cli.Command{
