@@ -8,7 +8,7 @@ import (
 )
 
 func Run(model tea.Model) error {
-	logFile, err := utils.LogPath()
+	logFile, err := utils.LogFile()
 	if err != nil {
 		return err
 	}
