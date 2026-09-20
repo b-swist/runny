@@ -7,6 +7,8 @@ import (
 	"os/exec"
 	"path/filepath"
 	"slices"
+
+	"golang.org/x/term"
 )
 
 func LogFile() (string, error) {
@@ -21,6 +23,11 @@ func LogFile() (string, error) {
 	f := filepath.Join(dir, "runny.log")
 
 	return f, nil
+}
+
+func IsInteractive() bool {
+	fd := int(os.Stdin.Fd())
+	return term.IsTerminal(fd)
 }
 
 func ReadStdin() ([]byte, error) {

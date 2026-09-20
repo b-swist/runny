@@ -2,7 +2,6 @@ package app
 
 import (
 	"fmt"
-	"os"
 
 	tea "charm.land/bubbletea/v2"
 	"github.com/b-swist/runny/internal/utils"
@@ -20,9 +19,9 @@ func Run(model tea.Model) error {
 	}
 	defer f.Close()
 
-	tty, err := os.OpenFile("/dev/tty", os.O_RDWR, 0)
+	_, tty, err := tea.OpenTTY()
 	if err != nil {
-		return fmt.Errorf("failed to open controlling terminal: %w", err)
+		return err
 	}
 	defer tty.Close()
 

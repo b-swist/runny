@@ -7,6 +7,7 @@ import (
 	"github.com/b-swist/runny/internal/app"
 	"github.com/b-swist/runny/internal/dmenu"
 	"github.com/b-swist/runny/internal/path"
+	"github.com/b-swist/runny/internal/utils"
 	"github.com/b-swist/runny/internal/xdg"
 	"github.com/urfave/cli/v3"
 )
@@ -18,7 +19,7 @@ func Main() error {
 		Name:    "runny",
 		Version: version,
 		Usage:   "Application launcher in your terminal",
-		Action:  desktopAction,
+		Action:  defaultAction,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:        "prompt",
@@ -48,7 +49,6 @@ func Main() error {
 				Action: dmenuAction,
 				Flags: []cli.Flag{
 					&cli.StringFlag{
-						Value:   "\n",
 						Name:    "delim",
 						Usage:   "specify delimeter",
 						Aliases: []string{"d"},
@@ -66,21 +66,38 @@ func Main() error {
 	return cmd.Run(context.Background(), os.Args)
 }
 
+func defaultAction(ctx context.Context, cmd *cli.Command) error {
+	if utils.IsInteractive() {
+		return desktopAction(ctx, cmd)
+	} else {
+		return dmenuAction(ctx, cmd)
+	}
+}
+
 func desktopAction(ctx context.Context, cmd *cli.Command) error {
-	return defaultAction(cmd, xdg.Entries)
+	return action(cmd, xdg.Entries)
 }
 
 func pathAction(ctx context.Context, cmd *cli.Command) error {
-	return defaultAction(cmd, path.Entries)
+	return action(cmd, path.Entries)
 }
 
 func dmenuAction(ctx context.Context, cmd *cli.Command) error {
-	return defaultAction(cmd, func() ([]*dmenu.DmenuEntry, error) {
-		return dmenu.Entries(cmd.String("input"), cmd.String("delim"))
+	var opts []dmenu.DmenuOption
+
+	if d := cmd.String("delim"); d != "" {
+		opts = append(opts, dmenu.WithDelimeter(d))
+	}
+	if i := cmd.String("input"); i != "" {
+		opts = append(opts, dmenu.WithInput(i))
+	}
+
+	return action(cmd, func() ([]*dmenu.DmenuEntry, error) {
+		return dmenu.Entries(opts...)
 	}, app.WithDesctiption(false))
 }
 
-func defaultAction[I app.Item](cmd *cli.Command, fn func() ([]I, error), opts ...app.ModelOption) error {
+func action[I app.Item](cmd *cli.Command, fn func() ([]I, error), opts ...app.ModelOption) error {
 	items, err := fn()
 	if err != nil {
 		return err

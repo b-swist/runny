@@ -20,22 +20,24 @@ func (e *DmenuEntry) Action() error {
 	return err
 }
 
-func Entries(input string, delim string) ([]*DmenuEntry, error) {
-	var options []string
+func Entries(opts ...DmenuOption) ([]*DmenuEntry, error) {
+	cfg := &dmenuConfig{delimeter: "\n"}
+	for _, opt := range opts {
+		opt.Apply(cfg)
+	}
 
-	if input != "" {
-		options = strings.Split(strings.TrimSpace(input), delim)
-	} else {
+	if cfg.input == "" {
 		data, err := utils.ReadStdin()
 		if err != nil {
 			return nil, err
 		}
-		options = strings.Split(strings.TrimSpace(string(data)), delim)
+		cfg.input = strings.TrimSpace(string(data))
 	}
 
-	entries := make([]*DmenuEntry, 0, len(options))
+	split := strings.Split(cfg.input, cfg.delimeter)
+	entries := make([]*DmenuEntry, 0, len(split))
 
-	for _, e := range options {
+	for _, e := range split {
 		entries = append(entries, &DmenuEntry{e})
 	}
 
