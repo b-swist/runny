@@ -7,30 +7,30 @@ Runny is a terminal-based application launcher for Linux, built in Go with [Bubb
 ## With Go
 
 ```shell
-    go install github.com/b-swist/runny@v0.3.2
+go install github.com/b-swist/runny@v0.3.2
 ```
 
 ## From Source
 
 ```shell
-    git clone https://github.com/b-swist/runny.git
-    cd runny
+git clone https://github.com/b-swist/runny.git
+cd runny
 ```
 
 Install system-wide:
 ```shell
-    sudo make install
+sudo make install
 ```
 
 Alternatively, Install for a single user:
 ```shell
-    make install PREFIX=~/.local
+make install PREFIX=~/.local
 ```
 
 > [!IMPORTANT]
 > Ensure that the directory is in `$PATH` (example for `~/.local/bin`)
 > ```shell
->   export PATH="$HOME/.local/bin:$PATH"
+> export PATH="$HOME/.local/bin:$PATH"
 > ```
 
 # Inspirations
