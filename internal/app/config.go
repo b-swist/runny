@@ -1,19 +1,14 @@
 package app
 
+import "github.com/b-swist/runny/internal/utils"
+
 type modelConfig struct {
 	prompt          string
 	showDescription bool
 }
 
-type ModelOption interface {
-	apply(*modelConfig)
-}
-
-type modelOptionFunc func(*modelConfig)
-
-func (f modelOptionFunc) apply(cfg *modelConfig) {
-	f(cfg)
-}
+type ModelOption = utils.ConfigOption[modelConfig]
+type modelOptionFunc = utils.ConfigFunc[modelConfig]
 
 func NewModelConfig(opts ...ModelOption) *modelConfig {
 	cfg := &modelConfig{
@@ -22,7 +17,7 @@ func NewModelConfig(opts ...ModelOption) *modelConfig {
 	}
 
 	for _, opt := range opts {
-		opt.apply(cfg)
+		opt.Apply(cfg)
 	}
 
 	return cfg
