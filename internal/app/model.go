@@ -25,11 +25,14 @@ func NewModel[I Item](items []I, cfg *modelConfig) *Model {
 	modelList := list.New(modelItems, delegate, 0, 0)
 	modelList.Title = cfg.prompt
 
+	modelList.SetFilterText("")
+	modelList.SetFilterState(list.Filtering)
+
 	return &Model{list: modelList}
 }
 
 func (m Model) ChosenEntry() Item { return Item(m.chosen) }
-func (m Model) Init() tea.Cmd     { return func() tea.Msg { return FocusFilterMsg{} } }
+func (m Model) Init() tea.Cmd     { return nil }
 
 func (m Model) View() tea.View {
 	r := AppStyle.Render(m.list.View())
@@ -38,13 +41,7 @@ func (m Model) View() tea.View {
 	return v
 }
 
-func (m *Model) focusFilter() {
-	m.list.SetFilterText("")
-	m.list.SetFilterState(list.Filtering)
-}
-
-type ChosenItemMsg = Item
-type FocusFilterMsg struct{}
+type ChosenItemMsg struct{ item Item }
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
@@ -53,11 +50,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.list.SetSize(msg.Width-h, msg.Height-v)
 
 	case ChosenItemMsg:
-		m.chosen = msg
+		m.chosen = msg.item
 		return m, tea.Quit
-
-	case FocusFilterMsg:
-		m.focusFilter()
 	}
 
 	var cmd tea.Cmd

@@ -13,7 +13,7 @@ func chosenItem(m *list.Model) tea.Cmd {
 	}
 
 	return func() tea.Msg {
-		return ChosenItemMsg(entry)
+		return ChosenItemMsg{item: entry}
 	}
 }
 
@@ -30,7 +30,7 @@ func newItemDelegate(keys *delegateKeyMap, showDesc bool) list.DefaultDelegate {
 	d.UpdateFunc = func(msg tea.Msg, m *list.Model) tea.Cmd {
 
 		switch msg := msg.(type) {
-		case tea.KeyMsg:
+		case tea.KeyPressMsg:
 			switch {
 			case key.Matches(msg, keys.choose):
 				return chosenItem(m)
